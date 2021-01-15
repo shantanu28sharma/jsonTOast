@@ -6,42 +6,42 @@ enum Node {
     LiteralValue(LiteralValue),
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct Object {
     children: Vec<Property>,
 }
 
-// #[derive(Default)]
+#[derive(Debug)]
 struct Property {
     key: LiteralValue,
     value: PropertyValue,
 }
 
-// #[derive(Default)]
+#[derive(Debug)]
 enum PropertyValue {
     Object(Object),
     Array(Array),
     LiteralValue(LiteralValue),
 }
 
-#[derive(Default)]
+#[derive(Debug)]
 struct Identifier {
     value: Literal,
     raw: String,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct Array {
     children: Vec<Option<PropertyValue>>,
 }
 
-#[derive(Default)]
+#[derive(Debug)]
 struct Literal {
     value: Option<LiteralValue>,
     raw: String,
 }
 
-// #[derive(Default)]
+#[derive(Debug)]
 enum LiteralValue {
     Str(String),
     Num(i64),
@@ -58,7 +58,7 @@ struct Point {
     column: u64,
 }
 
-struct AST {
+pub struct AST {
     line: u64,
     column: u64,
     pointer: usize,
@@ -71,6 +71,15 @@ enum CurrentElem {
 }
 
 impl AST {
+    fn new(file: &str) -> Self{
+        Self {
+            line: 1,
+            column: 1,
+            pointer: 0,
+            size: file.len(),
+            nodes: vec![],
+        }
+    }
     fn build_ast(file: &str) -> Vec<Node> {
         let mut state = Self {
             line: 1,
@@ -123,8 +132,11 @@ impl AST {
                     arr.push(Some(PropertyValue::LiteralValue(Self::number(file, state))));
                 }
             }
-            Self::consume(',', state, file);
+            Self::consume_many(' ', state, file);
+            Self::consume_or(',', state, file);
+            Self::consume_many(' ', state, file);
         }
+        Self::consume(']', state, file);
         Array { children: arr }
     }
 
@@ -137,12 +149,15 @@ impl AST {
             match Self::get_chr(state.pointer, file) {
                 '"' => {
                     key = Self::string(file, state);
+                    println!("{:?}",key);
                 }
                 _ => {
                     key = Self::number(file, state);
                 }
             };
+            Self::consume_many(' ', state, file);
             Self::consume(':', state, file);
+            Self::consume_many(' ', state, file);
             match Self::get_chr(state.pointer, file) {
                 '{' => {
                     value = PropertyValue::Object(Self::object(file, state));
@@ -161,9 +176,11 @@ impl AST {
                 key,
                 value
             });
-            Self::consume(',', state, file);
-        }
-
+            Self::consume_many(' ', state, file);
+            Self::consume_or(',', state, file);
+            Self::consume_many(' ', state, file);
+        };
+        Self::consume('}', state, file);
         Object {
             children,
         }
@@ -180,8 +197,9 @@ impl AST {
                     state.pointer += 1;
                 }
                 Err(_) => {
+                    println!("{:?}", &file[curr_pointer..state.pointer]);
                     return LiteralValue::Num(
-                        file[curr_pointer..state.pointer + 1]
+                        file[curr_pointer..state.pointer]
                             .to_string()
                             .parse::<i64>()
                             .unwrap(),
@@ -205,10 +223,23 @@ impl AST {
     }
 
     fn consume(chr: char, state: &mut AST, file: &str) {
-        if file.chars().nth(state.pointer).unwrap() != chr {
+        if Self::get_chr(state.pointer, file) != chr {
             panic!("Error");
         }
         state.pointer += 1;
+    }
+
+    fn consume_or(chr: char, state: &mut AST, file: &str) {
+        if Self::get_chr(state.pointer, file) != chr {
+            return;
+        }
+        state.pointer += 1;
+    }
+
+    fn consume_many(chr: char, state: &mut AST, file: &str){
+        while Self::get_chr(state.pointer, file) == chr {
+            state.pointer += 1;
+        }
     }
 
     fn match_until(chr: char, state: &mut AST, file: &str) {
@@ -221,5 +252,31 @@ impl AST {
 
 #[cfg(test)]
 mod tests{
-    
+    use super::*;
+    #[test]
+    fn get_chr(){
+        assert_eq!(AST::get_chr(1, "433"), '3');
+    }
+    #[test]
+    fn basic_str(){
+        let mut ast = AST::new("fefwewe");
+        let temp = r#""adasnf""#;
+        println!("{}", temp);
+        println!("{:?}",AST::string(temp, &mut ast));
+        assert!(true);
+    }
+    #[test]
+    fn basic_array() {
+        let mut ast = AST::new(r#"[5,6,7]"#);
+        let temp = r#"[5,6,7]"#;
+        println!("{:?}",AST::array(temp, &mut ast));
+        assert!(true);
+    }
+    #[test]
+    fn basic_object() {
+        let mut ast = AST::new(r#"{"a":5,"b":[4,5, "gf"]}"#);
+        let temp = r#"{"a":5,"b":[4,5 , "gf"]}"#;
+        println!("{:?}",AST::object(temp, &mut ast));
+        assert!(true);
+    }
 }
