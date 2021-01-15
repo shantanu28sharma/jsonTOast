@@ -67,10 +67,6 @@ pub struct AST {
     nodes: Vec<Node>,
 }
 
-enum CurrentElem {
-    Array,
-}
-
 impl AST {
     fn new(file: &str) -> Self {
         Self {
@@ -298,7 +294,6 @@ impl AST {
             line: state.line,
             column: state.column,
         };
-        // println!("{:?}", &file[state.pointer..state.pointer + 4]);
         if &file[state.pointer..state.pointer + 4] == "true" {
             state.pointer += 4;
             state.column += 4;
