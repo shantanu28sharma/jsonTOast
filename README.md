@@ -6,6 +6,9 @@ ToDo: Files containing new lines will be parsed correctly but the span of nodes 
 
 Example:
 ```
+JSON: {"a":5,"b":[4,5 , "gf"]}
+
+Parsed Tree:
 [ { type: "Object", children: 
     [ { type: "Property", 
         key:  
