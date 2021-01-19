@@ -1,62 +1,53 @@
 #![allow(dead_code)]
 
-#[derive(Debug)]
-enum Node {
+pub enum Node {
     Object(Object),
     Array(Array),
     Literal(Literal),
 }
 
-#[derive(Debug)]
-struct Object {
-    children: Vec<Property>,
+pub struct Object {
+    pub children: Vec<Property>,
     span: Span,
 }
 
-#[derive(Debug)]
-struct Property {
-    key: Literal,
-    value: PropertyValue,
+pub struct Property {
+    pub key: Literal,
+    pub value: PropertyValue,
     span: Span,
 }
 
-#[derive(Debug)]
-enum PropertyValue {
+pub enum PropertyValue {
     Object(Object),
     Array(Array),
     Literal(Literal),
 }
 
-#[derive(Debug)]
-struct Array {
-    children: Vec<PropertyValue>,
+pub struct Array {
+    pub children: Vec<PropertyValue>,
     span: Span,
 }
 
-#[derive(Debug)]
-struct Literal {
-    value: LiteralValue,
-    span: Span,
+pub struct Literal {
+    pub value: LiteralValue,
+    pub span: Span,
 }
 
-#[derive(Debug)]
-enum LiteralValue {
+pub enum LiteralValue {
     Str(String),
     Num(i64),
     Bool(bool),
     Null,
 }
 
-#[derive(Debug)]
-struct Span {
-    start: Point,
-    end: Point,
+pub struct Span {
+    pub start: Point,
+    pub end: Point,
 }
 
-#[derive(Debug)]
-struct Point {
-    line: u64,
-    column: u64,
+pub struct Point {
+    pub line: u64,
+    pub column: u64,
 }
 
 pub struct AST {
@@ -68,25 +59,18 @@ pub struct AST {
 }
 
 impl AST {
-    fn new(file: &str) -> Self {
+    fn new() -> Self {
         Self {
             line: 1,
             column: 1,
             pointer: 0,
-            size: file.len(),
+            size: 0,
             nodes: vec![],
         }
     }
-    fn build_ast(file: &str) -> Vec<Node> {
-        let mut state = Self {
-            line: 1,
-            column: 1,
-            pointer: 0,
-            size: file.len(),
-            nodes: vec![],
-        };
-        Self::parse_tree(&mut state, file);
-        vec![]
+    fn build_ast(&mut self, file: &str) -> Vec<Node> {
+        self.size = file.len();
+        return Self::parse_tree(self, file);
     }
     fn parse_tree(state: &mut Self, file: &str) -> Vec<Node> {
         let mut result: Vec<Node> = vec![];
@@ -139,9 +123,6 @@ impl AST {
                 '"' => {
                     arr.push(PropertyValue::Literal(Self::string(file, state)));
                 }
-                ' ' => {
-                    Self::consume_many(' ', state, file);
-                }
                 _ => {
                     arr.push(PropertyValue::Literal(Self::abstract_literal(file, state)));
                 }
@@ -179,7 +160,7 @@ impl AST {
             match Self::get_chr(state.pointer, file) {
                 '"' => {
                     key = Self::string(file, state);
-                    println!("{:?}", key);
+                    // println!("{:?}", key);
                 }
                 _ => {
                     panic!();
@@ -239,6 +220,7 @@ impl AST {
             line: state.line,
             column: state.column,
         };
+        // println!("{:?}", lit);
         return Literal {
             value: lit,
             span: Span { start, end },
@@ -246,7 +228,7 @@ impl AST {
     }
 
     fn abstract_literal(file: &str, state: &mut AST) -> Literal {
-        let curr = Self::get_chr(state.pointer + 1, file);
+        let curr = Self::get_chr(state.pointer, file);
         if Self::check_next(curr, "number") {
             return Self::number(file, state);
         } else {
@@ -317,7 +299,7 @@ impl AST {
                 span: Span { start, end },
             };
         } else {
-            println!("in");
+            // println!("in");
             state.pointer += 4;
             state.column += 4;
             let end = Point {
@@ -396,7 +378,7 @@ mod tests {
     }
     #[test]
     fn basic_str() {
-        let mut ast = AST::new("fefwewe");
+        let mut ast = AST::new();
         let temp = r#""adasnf""#;
         println!("{}", temp);
         println!("{:?}", AST::string(temp, &mut ast));
@@ -404,16 +386,16 @@ mod tests {
     }
     #[test]
     fn basic_array() {
-        let mut ast = AST::new(r#"{"a":[55,6,7,null]}"#);
+        let mut ast = AST::new();
         let temp = r#"{"a":[55,6,7,null]}"#;
         println!("{:?}", AST::parse_tree(&mut ast, temp));
         assert!(true);
     }
     #[test]
     fn basic_object() {
-        let mut ast = AST::new(r#"{"a":5,"b":[4,5, "gf"]}"#);
+        let mut ast = AST::new();
         let temp = r#"{"a":5,"b":[4,5 , "gf"]}"#;
-        println!("{:?}", AST::object(temp, &mut ast));
-        assert!(true);
+        println!("{:?}", ast.build_ast(temp));
+        assert!(false);
     }
 }
