@@ -28,8 +28,8 @@ impl fmt::Debug for LiteralValue {
         match self {
             &LiteralValue::Str(ref st) => write!(f, "{:?}", st),
             &LiteralValue::Num(ref num) => write!(f, "{}", num),
-            &LiteralValue::Bool(bl) => write!(f, "{}", bl),
-            LiteralValue::Null => write!(f, "null"),
+            &LiteralValue::Bool(ref bl) => write!(f, "{}", bl),
+            &LiteralValue::Null => write!(f, "null"),
         }
     }
 }
@@ -39,6 +39,7 @@ impl fmt::Debug for Object {
         f.debug_struct("")
             .field("type", &"Object")
             .field("children", &self.children)
+            .field("loc", &self.span)
             .finish()
     }
 }
@@ -49,6 +50,7 @@ impl fmt::Debug for Property {
             .field("type", &"Property")
             .field("key", &self.key)
             .field("value", &self.value)
+            .field("loc", &self.span)
             .finish()
     }
 }
@@ -73,7 +75,7 @@ impl fmt::Debug for Literal {
 
 impl fmt::Debug for Span {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("loc")
+        f.debug_struct("")
             .field("start", &self.start)
             .field("end", &self.end)
             .finish()
