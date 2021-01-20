@@ -8,13 +8,13 @@ pub enum Node {
 
 pub struct Object {
     pub children: Vec<Property>,
-    span: Span,
+    pub span: Span,
 }
 
 pub struct Property {
     pub key: Literal,
     pub value: PropertyValue,
-    span: Span,
+    pub span: Span,
 }
 
 pub enum PropertyValue {
@@ -25,7 +25,7 @@ pub enum PropertyValue {
 
 pub struct Array {
     pub children: Vec<PropertyValue>,
-    span: Span,
+    pub span: Span,
 }
 
 pub struct Literal {
@@ -394,7 +394,7 @@ mod tests {
     #[test]
     fn basic_object() {
         let mut ast = AST::new();
-        let temp = r#"{"a":5,"b":[4,5 , "gf"]}"#;
+        let temp = r#"{"a":5,"b":[false,true , null]}"#;
         println!("{:?}", ast.build_ast(temp));
         assert!(false);
     }
