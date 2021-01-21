@@ -87,7 +87,7 @@ impl AST {
                     result.push(Node::Literal(Self::string(file, state)));
                 }
                 ' ' => {
-                    Self::consume_many(' ', state, file);
+                    Self::consume_space_new_line(state, file);
                 }
                 _ => {
                     if Self::check_next(curr, "number") {
@@ -127,9 +127,9 @@ impl AST {
                     arr.push(PropertyValue::Literal(Self::abstract_literal(file, state)));
                 }
             }
-            Self::consume_many(' ', state, file);
+            Self::consume_space_new_line(state, file);
             Self::consume_or(',', state, file);
-            Self::consume_many(' ', state, file);
+            Self::consume_space_new_line(state, file);
         }
         let end = Point {
             line: state.line,
@@ -156,7 +156,7 @@ impl AST {
             };
             let key: Literal;
             let value: PropertyValue;
-            Self::consume_many(' ', state, file);
+            Self::consume_space_new_line(state, file);
             match Self::get_chr(state.pointer, file) {
                 '"' => {
                     key = Self::string(file, state);
@@ -166,9 +166,9 @@ impl AST {
                     panic!();
                 }
             };
-            Self::consume_many(' ', state, file);
+            Self::consume_space_new_line(state, file);
             Self::consume(':', state, file);
-            Self::consume_many(' ', state, file);
+            Self::consume_space_new_line(state, file);
             match Self::get_chr(state.pointer, file) {
                 '{' => {
                     value = PropertyValue::Object(Self::object(file, state));
@@ -192,9 +192,9 @@ impl AST {
                 value,
                 span: Span { start, end },
             });
-            Self::consume_many(' ', state, file);
+            Self::consume_space_new_line(state, file);
             Self::consume_or(',', state, file);
-            Self::consume_many(' ', state, file);
+            Self::consume_space_new_line(state, file);
         }
         let end = Point {
             line: state.line,
@@ -333,10 +333,25 @@ impl AST {
         state.column += 1;
     }
 
-    fn consume_many(chr: char, state: &mut AST, file: &str) {
-        while Self::get_chr(state.pointer, file) == chr {
-            state.pointer += 1;
-            state.column += 1;
+    fn consume_space_new_line(state: &mut AST, file: &str) {
+        if state.pointer == file.len() {
+            return;
+        }
+        let mut chr = Self::get_chr(state.pointer, file);
+        println!("{}", chr);
+        while chr == ' ' || chr == '\n' {
+            if chr == '\n' {
+                state.line += 1;
+                state.pointer += 1;
+                state.column = 0;
+            } else {
+                state.pointer += 1;
+                state.column += 1;
+            }
+            if state.pointer == file.len() {
+                return;
+            }
+            chr = Self::get_chr(state.pointer, file);
         }
     }
 
@@ -369,33 +384,36 @@ impl AST {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn get_chr() {
-        assert_eq!(AST::get_chr(1, "433"), '3');
-    }
-    #[test]
-    fn basic_str() {
-        let mut ast = AST::new();
-        let temp = r#""adasnf""#;
-        println!("{}", temp);
-        println!("{:?}", AST::string(temp, &mut ast));
-        assert!(true);
-    }
-    #[test]
-    fn basic_array() {
-        let mut ast = AST::new();
-        let temp = r#"{"a":[55,6,7,null]}"#;
-        println!("{:?}", AST::parse_tree(&mut ast, temp));
-        assert!(true);
-    }
-    #[test]
-    fn basic_object() {
-        let mut ast = AST::new();
-        let temp = r#"{"a":5,"b":[false,true , null]}"#;
-        println!("{:?}", ast.build_ast(temp));
-        assert!(false);
-    }
-}
+// #[cfg(test)]
+// mod tests {
+// use super::*;
+// #[test]
+// fn get_chr() {
+// assert_eq!(AST::get_chr(1, "433"), '3');
+// }
+// #[test]
+// fn basic_str() {
+// let mut ast = AST::new();
+// let temp = r#""adasnf""#;
+// println!("{}", temp);
+// println!("{:?}", AST::string(temp, &mut ast));
+// assert!(true);
+// }
+// #[test]
+// fn basic_array() {
+// let mut ast = AST::new();
+// let temp = r#"{"a":[55,6,7,null]}"#;
+// println!("{:?}", AST::parse_tree(&mut ast, temp));
+// assert!(true);
+// }
+// #[test]
+// fn basic_object() {
+// let mut ast = AST::new();
+// let temp = r#"{"a":5,"b":
+// [4,5 , "gf"]
+// }
+// "#;
+// println!("{:?}", ast.build_ast(temp));
+// assert!(false);
+// }
+// }

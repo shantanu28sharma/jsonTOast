@@ -6,9 +6,9 @@ use std::fmt;
 impl fmt::Debug for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            &Node::Object(ref obj) => write!(f, "{:?}", obj),
-            &Node::Array(ref arr) => write!(f, "{:?}", arr),
-            &Node::Literal(ref lit) => write!(f, "{:?}", lit),
+            &Node::Object(ref obj) => write!(f, "{:#?}", obj),
+            &Node::Array(ref arr) => write!(f, "{:#?}", arr),
+            &Node::Literal(ref lit) => write!(f, "{:#?}", lit),
         }
     }
 }
@@ -16,9 +16,9 @@ impl fmt::Debug for Node {
 impl fmt::Debug for PropertyValue {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            &PropertyValue::Object(ref obj) => write!(f, "{:?}", obj),
-            &PropertyValue::Array(ref arr) => write!(f, "{:?}", arr),
-            &PropertyValue::Literal(ref lit) => write!(f, "{:?}", lit),
+            &PropertyValue::Object(ref obj) => write!(f, "{:#?}", obj),
+            &PropertyValue::Array(ref arr) => write!(f, "{:#?}", arr),
+            &PropertyValue::Literal(ref lit) => write!(f, "{:#?}", lit),
         }
     }
 }
@@ -26,7 +26,7 @@ impl fmt::Debug for PropertyValue {
 impl fmt::Debug for LiteralValue {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            &LiteralValue::Str(ref st) => write!(f, "{:?}", st),
+            &LiteralValue::Str(ref st) => write!(f, "{:#?}", st),
             &LiteralValue::Num(ref num) => write!(f, "{}", num),
             &LiteralValue::Bool(ref bl) => write!(f, "{}", bl),
             &LiteralValue::Null => write!(f, "null"),
