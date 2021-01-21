@@ -63,7 +63,7 @@ Parsed Tree:
                 },
                 end:  {
                     line: 2,
-                    column: 12,
+                    column: 13,
                 },
             },
         },
@@ -75,7 +75,7 @@ Parsed Tree:
         },
         end:  {
             line: 3,
-            column: 0,
+            column: 1 ,
         },
     },
 }]
