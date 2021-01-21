@@ -338,12 +338,11 @@ impl AST {
             return;
         }
         let mut chr = Self::get_chr(state.pointer, file);
-        println!("{}", chr);
         while chr == ' ' || chr == '\n' {
             if chr == '\n' {
                 state.line += 1;
                 state.pointer += 1;
-                state.column = 0;
+                state.column = 1;
             } else {
                 state.pointer += 1;
                 state.column += 1;
